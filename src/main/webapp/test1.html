@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<!--
+Project name(项目名称)：task6
+  File name(文件名): test1
+  Authors(作者）: mao
+  Author QQ：1296193245
+  GitHub：https://github.com/maomao124/
+  Date(创建日期)： 2022/5/26
+  Time(创建时间)： 17:06
+  Description(描述)： 无
+-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body onload="getLocation()">
+<h3>跑步记录功能的设计与实现</h3>
+<hr/>
+<div style="width:360px;">
+    <div id="time">
+        <h4>您的当前状态</h4>
+        <ul>
+            <li id="start"></li>
+            <li id="end"></li>
+            <li id="distance"></li>
+        </ul>
+    </div>
+    <div id="location">
+        <h4>详细信息</h4>
+        <ul>
+            <li id="jingdu"></li>
+            <li id="weidu"></li>
+            <li id="jingque"></li>
+            <li id="haiba"></li>
+            <li id="speed"></li>
+        </ul>
+    </div>
+    <div style="text-align:center;">
+        <button id="btn" onclick="run()">开始记录</button>
+    </div>
+</div>
+<script>
+    var time = document.getElementById("time");
+    var start = document.getElementById("start");
+    var end = document.getElementById("end");
+    var distance = document.getElementById("distance");
+
+    function newStartTime()
+    {
+        var date = new Date();
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        var h = date.getHours();
+        h = h < 10 ? '0' + h : h;
+        var m = date.getMinutes();
+        m = m < 10 ? '0' + m : m;
+        var s = date.getSeconds();
+        s = s < 10 ? '0' + s : s;
+        start.innerHTML = "开始时间:" + year + "年" + month + "月" + day + "日 " + h + ":" + m + ":" + s;
+    }
+
+    var shuaxin1 = setInterval("newStartTime()", 1000);
+    end.innerHTML = "完成时间:";
+    distance.innerHTML = "总距离:0 km";
+
+    function newEndTime()
+    {
+        var date = new Date();
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        var h = date.getHours();
+        h = h < 10 ? '0' + h : h;
+        var m = date.getMinutes();
+        m = m < 10 ? '0' + m : m;
+        var s = date.getSeconds();
+        s = s < 10 ? '0' + s : s;
+        end.innerHTML = "完成时间:" + year + "年" + month + "月" + day + "日 " + h + ":" + m + ":" + s;
+    }
+
+    var x = document.getElementById("location");
+    var jingdu = document.getElementById("jingdu");
+    var weidu = document.getElementById("weidu");
+    var jingque = document.getElementById("jingque");
+    var haiba = document.getElementById("haiba");
+    var speed = document.getElementById("speed");
+
+    function getLocation()
+    {
+        if (navigator.geolocation)
+        {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        }
+        else
+        {
+            x.innerHTML = "对不起，您的浏览器不支持地理定位服务";
+        }
+    }
+
+    //回调函数，用于接收获取的经纬度以及描述信息
+    function showPosition(position)
+    {
+        jingdu.innerHTML = "经度:" + position.coords.longitude + "°";
+        weidu.innerHTML = "纬度:" + position.coords.latitude + "°";
+        jingque.innerHTML = "位置精确度:" + position.coords.accuracy;
+        haiba.innerHTML = "海拔高度:" + position.coords.altitude + " m";
+        speed.innerHTML = "速度:" + (position.coords.speed == null ? 0 : position.coords.speed) + " m/s";
+    }
+
+    //根据经纬度计算距离，参数分别为第一点的纬度，经度；第二点的纬度，经度
+    function getDistance(lat1, lng1, lat2, lng2)
+    {
+        var radLat1 = lat1 * Math.PI / 180.0;
+        var radLat2 = lat2 * Math.PI / 180.0;
+        var a = radLat1 - radLat2;
+        var b = lng1 * Math.PI / 180.0 - lng2 * Math.PI / 180.0;
+        var s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+        s = s * 6378.137;
+        s = Math.round(s * 10000) / 10000;
+        return s;
+    }
+
+    var shuaxin2 = null;
+    var lat1;
+    var lng1;
+    var lat2;
+    var lng2;
+
+    function run()
+    {
+        var btn = document.getElementById("btn");
+        if (btn.innerHTML == "开始记录")
+        {
+            clearInterval(shuaxin1);
+            newStartTime();
+            shuaxin2 = setInterval("newEndTime()", 1000);
+            btn.innerHTML = "完成记录";
+            getLocation();
+            navigator.geolocation.getCurrentPosition(function (position)
+            {
+                lat1 = position.coords.latitude;
+                lng1 = position.coords.longitude;
+            });
+            distance.innerHTML = "总距离:0 km";
+        }
+        else
+        {
+            clearInterval(shuaxin2);
+            //newEndTime();
+            getLocation();
+            navigator.geolocation.getCurrentPosition(function (position)
+            {
+                lat2 = position.coords.latitude;
+                lng2 = position.coords.longitude;
+                var s = getDistance(lat1, lng1, lat2, lng2);
+                distance.innerHTML = "总距离:" + s + " km";
+            });
+            btn.innerHTML = "开始记录";
+        }
+    }
+</script>
+</body>
+</html>
